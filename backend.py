@@ -472,7 +472,7 @@ def thread_document_metadata(thread_id: str) -> dict:
 
 #1. MAIN GRAPH= chatnode(creates ai message by invvoking the llm. ai message informs the llm which tool it needs to call)
 #2. MAINGRAPH REACHES TOOL NODE= tool node calls the rag_tool, which basically implements our subgraph, and then the rag_tool returns a python dicitonary consisting of our refined_context. when we do tools = [rag_tool], llm_with_tools = llm.bind_tools(tools) , our toolmessage gets updated with the refined context
-#3. MAIN GRAPH AGAIN REACHED CHAT_NODE= now chat_node uses this tool_message (which consists of our refined_context)and our final response is generated
+#3. MAIN GRAPH AGAIN REACHED CHAT_NODE= now chat_node uses this tool_message (which consists of our refined_context)and our final response is generated.
 
 
 
