@@ -19,3 +19,5 @@ __pycache__/
 working.txt
 .pdf
 .jsonl
+dataset.jsonl
+eval/results/
