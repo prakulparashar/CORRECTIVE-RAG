@@ -16,4 +16,6 @@ __pycache__/
 .DS_Store
 
 .txt
+working.txt
 .pdf
+.jsonl
