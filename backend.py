@@ -69,7 +69,7 @@ def ingest_pdf(file_bytes: bytes, thread_id: str, filename: Optional[str] = None
         for d in chunks:
             d.page_content = d.page_content.encode("utf-8", "ignore").decode("utf-8", "ignore")
 
-        vector_store = FAISS.from_documents(chunks, embeddings)         #EMBEDDING being passed as arguments, FAISS now knows how to embedd even the queries. vector_store now becomes an object. in the below line, .as_retriever is the method
+        vector_store = FAISS.from_documents(chunks, embeddings)         #EMBEDDING being passed as arguments, FAISS now knows how to embed even the queries. vector_store now becomes an object. in the below line, .as_retriever is the method
         retriever = vector_store.as_retriever(                          # retriever.invoke() can be used now . basically .invoke()is the method which actually does the retrieval, and as_retriever is used to create the retriever object
             search_type="similarity", search_kwargs={"k": 4}
         )
