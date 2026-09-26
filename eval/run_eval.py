@@ -50,6 +50,7 @@ def run_retriever_evaluation():
                 "id": question_id,
                 "question": question,
                 "expected_route": row["expected_route"],
+                "ground_truth": row["ground_truth"],
                 "reference_context": row.get("reference_context", ""),
                 "retrieved_context": [
                     doc.page_content for doc in docs
@@ -61,6 +62,9 @@ def run_retriever_evaluation():
             )
 
     print(f"Results saved to: {RESULTS_PATH}")
+
+
+
 
 
 if __name__ == "__main__":

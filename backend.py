@@ -111,12 +111,12 @@ class CRAGState(TypedDict):
 # -------------------
 # 5. CRAG Subgraph — Scorer
 # -------------------
-class DocEvalScore(BaseModel): #basemodel manje pydantic
+class DocEvalScore(BaseModel): #basemodel means pydantic
     score: float
     reason: str
 
 
-_doc_eval_prompt = ChatPromptTemplate.from_messages([
+_doc_eval_prompt = ChatPromptTemplate.from_messages([ #using langchain's ChatPromptTemplate to define system and human message
     ("system",
      "You are a strict retrieval evaluator for RAG.\n"
      "You will be given ONE retrieved chunk and a question.\n"
@@ -129,8 +129,9 @@ _doc_eval_prompt = ChatPromptTemplate.from_messages([
     ("human", "Question: {question}\n\nChunk:\n{chunk}"),
 ])
 
-_doc_eval_chain = _doc_eval_prompt | llm.with_structured_output(DocEvalScore) #created an agent using langchain, prompt is _doc_eval_prompt  passed the pydantic format named "docevalscore". so the response will be in that format only.
+_doc_eval_chain = _doc_eval_prompt | llm.with_structured_output(DocEvalScore) #created an agent using langchain, prompt is _doc_eval_prompt, passed the pydantic format named "docevalscore". so the response will be in that format only.
 #Notes: | is called the pipe operator in langchain. this means the take whatever is on the left and feed to the right.
+#Notes: the one on the left of the pipe operator(in this case _doc_eval_prompt) is basically Langchain's ChatPromptTemplate, when we call _doc_eval_prompt, it outputs system message and human message (which we have defined above), and using the pipe operator we feed the output of _doc_eval_prompt to the LLM
 
 # -------------------
 # 6. CRAG Subgraph — Nodes
@@ -190,7 +191,10 @@ _rewrite_prompt = ChatPromptTemplate.from_messages([
     ("human", "Question: {question}"),
 ])
 
-_rewrite_chain = _rewrite_prompt | llm.with_structured_output(WebQuery)
+_rewrite_chain = _rewrite_prompt | llm.with_structured_output(WebQuery) #langchain (here _rewrite_prompt is our ChatPromptTemplate)
+
+#over here we first used pydantic & ChatPromptTemplate and used those to give it to langchain, then langchain created an invocable chain i.e _rewrite_chain (basically a query rewriting tool), and then we created a langgraph node (our rewrite_query_node function) which executed our runnable chain .....this is a pretty recurring pattern in this project
+
 
 
 def rewrite_query_node(state: CRAGState) -> CRAGState:
@@ -241,7 +245,7 @@ _filter_prompt = ChatPromptTemplate.from_messages([
     ("human", "Question: {question}\n\nSentence:\n{sentence}"),
 ])
 
-_filter_chain = _filter_prompt | llm.with_structured_output(KeepOrDrop)
+_filter_chain = _filter_prompt | llm.with_structured_output(KeepOrDrop) #langchain (here _filter_prompt is our ChatPromptTemplate)
 
 
 def refine_node(state: CRAGState) -> CRAGState:
