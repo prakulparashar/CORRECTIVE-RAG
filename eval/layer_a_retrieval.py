@@ -15,6 +15,8 @@ load_dotenv()
 # reference_context = gold/source passage supporting the answer
 # retrieved_context = what FAISS actually retrieved
 
+
+# Paths
 EVAL_DIR = Path(__file__).parent
 RESULTS_PATH = EVAL_DIR / "results" / "retrieval_results.jsonl"
 
@@ -26,6 +28,10 @@ judge_model = OpenAIModel(
     temperature=0,
 )
 
+
+# -------------------
+# LAYER A - RETRIEVAL EVALUATION
+# -------------------
 def load_retrieval_results():
     results = []
 
@@ -65,13 +71,13 @@ def main():
     print(f"Loaded {len(results)} retrieval results.")
     print(f"Scoring {len(test_cases)} answerable questions.")
 
-    contextual_precision = ContextualPrecisionMetric(    #again defining an object with predefined metrics for evaluation
+    contextual_precision = ContextualPrecisionMetric(    #defining an object with predefined metrics for evaluation
         threshold=0.5,
         include_reason=False,
         model=judge_model,
     )
 
-    contextual_recall = ContextualRecallMetric(          #again defining an object with predefined metrics for evaluation
+    contextual_recall = ContextualRecallMetric(          #defining an object with predefined metrics for evaluation
         threshold=0.5,
         include_reason=False,
         model=judge_model,
@@ -92,6 +98,39 @@ def main():
         ],
         async_config=async_config,
     )
+
+# -------------------
+# LAYER B - Generation Evaluation
+# -------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 if __name__ == "__main__":
