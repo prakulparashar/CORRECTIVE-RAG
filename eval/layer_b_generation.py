@@ -1,36 +1,44 @@
 import json
 from pathlib import Path
-
 from deepeval import evaluate
 from deepeval.metrics import ContextualPrecisionMetric, ContextualRecallMetric
 from deepeval.test_case import LLMTestCase
 from deepeval.evaluate import AsyncConfig
+from deepeval.models import GeminiModel
 from dotenv import load_dotenv
 from deepeval.models import OpenAIModel
 import os
+from deepeval.models import OpenAIModel
+from langchain_ollama import ChatOllama
 from deepeval.metrics import (
     FaithfulnessMetric,
     AnswerRelevancyMetric,
     GEval,
 )
-from deepeval.test_case import LLMTestCaseParams
-from deepeval.models import OpenAIModel
 
-from langchain_ollama import ChatOllama
-
-
-
+load_dotenv()
 
 # Paths
 EVAL_DIR = Path(__file__).parent
 DATASET_PATH = EVAL_DIR / "dataset.jsonl"
 RESULTS_PATH = EVAL_DIR / "results" / "generation_results.jsonl"
 
-# Application LLM
+# LLM for generating our responses, so that we can build our test cases, this is the same LLM used in our main CRAG pipeline
 llm = ChatOllama(
     model="llama3.1",
     temperature=0
 )
+
+
+
+# LLM for evaluation/ Judge LLM
+judge_model = OpenAIModel(
+    model="qwen/qwen3.8-27b",
+    api_key=os.getenv("GROQ_API_KEY"),
+    base_url="https://api.groq.com/openai/v1",
+    temperature=0,
+)
+
 
 
 def generate_answer(question, retrieved_context):
@@ -130,7 +138,60 @@ def build_test_cases(results):
 
     return test_cases
 
+def get_metrics():
+    faithfulness = FaithfulnessMetric(
+        threshold=0.5,
+        model=judge_model,
+        include_reason=False,
+    )
 
+    answer_relevancy = AnswerRelevancyMetric(
+        threshold=0.5,
+        model=judge_model,
+        include_reason=False,
+    )
+
+    correctness = GEval(
+        name="Correctness",
+        criteria=(
+            "Evaluate whether the actual output correctly answers the input "
+            "and matches the expected output. Accept semantically equivalent "
+            "answers even when their wording differs."
+        ),
+        evaluation_params=[
+            LLMTestCaseParams.INPUT,
+            LLMTestCaseParams.ACTUAL_OUTPUT,
+            LLMTestCaseParams.EXPECTED_OUTPUT,
+        ],
+        threshold=0.5,
+        model=judge_model,
+        async_mode=False,
+    )
+
+    return [faithfulness, answer_relevancy, correctness]
+
+
+
+
+def evaluate_generation():
+    results = load_retrieval_results()
+    test_cases = build_test_cases(results)
+
+    test_cases = test_cases[:1]
+
+    print(f"Loaded {len(test_cases)} generation test cases.")
+
+    metrics = get_metrics()
+
+    evaluate(
+        test_cases,
+        metrics=metrics,
+        async_config=AsyncConfig(
+            run_async=False,
+            max_concurrent=1,
+            throttle_value=3,
+        ),
+    )
 
 
 
@@ -138,4 +199,5 @@ def build_test_cases(results):
 
 
 if __name__ == "__main__":
-    main()
+    #main() #for generating and saving answers in generation_results.jsonl
+    evaluate_generation() #for evaluation

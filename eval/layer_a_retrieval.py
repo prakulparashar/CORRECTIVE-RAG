@@ -1,12 +1,12 @@
 import json
 from pathlib import Path
-
 from deepeval import evaluate
 from deepeval.metrics import ContextualPrecisionMetric, ContextualRecallMetric
 from deepeval.test_case import LLMTestCase
 from deepeval.evaluate import AsyncConfig
 from dotenv import load_dotenv
 from deepeval.models import OpenAIModel
+from deepeval.models import GeminiModel
 import os
 
 load_dotenv()
