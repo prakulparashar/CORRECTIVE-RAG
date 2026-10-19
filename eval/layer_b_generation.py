@@ -10,6 +10,7 @@ from deepeval.models import OpenAIModel
 import os
 from deepeval.models import OpenAIModel
 from langchain_ollama import ChatOllama
+from deepeval.test_case import LLMTestCaseParams
 from deepeval.metrics import (
     FaithfulnessMetric,
     AnswerRelevancyMetric,
