@@ -99,33 +99,6 @@ def main():
         async_config=async_config,
     )
 
-# -------------------
-# LAYER B - Generation Evaluation
-# -------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -43,7 +43,7 @@ def run_retriever_evaluation():
             question = row["question"]
 
 
-            # the isolated retriever is being evaluated here
+            # the isolated retriever is being evaluated here. .invoke() is the method which does the retrieval 
             docs = retriever.invoke(question)
 
             result = {

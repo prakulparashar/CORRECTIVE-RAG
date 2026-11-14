@@ -41,6 +41,10 @@ judge_model = OpenAIModel(
 )
 
 
+# -------------------
+# LAYER B - Generation Evaluation
+# -------------------
+
 
 def generate_answer(question, retrieved_context):
     prompt = f"""
