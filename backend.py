@@ -1,14 +1,12 @@
 from __future__ import annotations
-
 import os
 import re
 import sqlite3
 import tempfile
 from typing import Annotated, Any, Dict, List, Optional, TypedDict
-
 from dotenv import load_dotenv
 from langchain_community.document_loaders import PyPDFLoader
-from langchain_community.vectorstores import FAISS
+from langchain_community.vectorstores import FAISS #.as_retriever is a method of this class 
 from langchain_core.documents import Document
 from langchain_core.messages import BaseMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate
@@ -22,6 +20,7 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode, tools_condition
 from pydantic import BaseModel
+from langchain_community.retrievers import BM25Retriever
 
 load_dotenv()
 
@@ -42,7 +41,7 @@ LOWER_TH = 0.3
 # -------------------
 _THREAD_RETRIEVERS: Dict[str, Any] = {} #global dictionaries,stores the pointers to the vector stores , because we are assigning dedicated FAISS store to its dedicated thread:id (user). it is a dict. where every thread id (key) is associated with its respective retriever object, and each retriever object points to the FAISS store of THAT thread_id only. get retriever function just returns the retriever object of THAT thread id
 _THREAD_METADATA: Dict[str, dict] = {}
-
+_THREAD_BM25: Dict[str, Any] = {}
 
 def _get_retriever(thread_id: Optional[str]):
     if thread_id and thread_id in _THREAD_RETRIEVERS: #suppose if user makes req. with thread_id_abc, this fxn looks for that ID in the dict we defined above. if it exists....
@@ -75,6 +74,12 @@ def ingest_pdf(file_bytes: bytes, thread_id: str, filename: Optional[str] = None
         )
 
         _THREAD_RETRIEVERS[str(thread_id)] = retriever #at this moment, the retriever object is assigned to the respective thread_id and this key-value pair is stored INSIDE the _THREAD_RETRIEVERS dictionary, which is global.
+
+        #BM25 -> sparse search based on keywords
+        bm25 = BM25Retriever.from_documents(chunks)   # same chunks as FAISS
+        bm25.k = 4
+
+        _THREAD_BM25[str(thread_id)] = bm25
         _THREAD_METADATA[str(thread_id)] = {
             "filename": filename or os.path.basename(temp_path),
             "documents": len(docs),
